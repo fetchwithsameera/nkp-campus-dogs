@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NKP Campus Dogs</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<style>
+:root{--brand:#8B0000;--brand-lt:#b30000;--bg:#111;--surface:#1a1a1a;--card:#222;--border:rgba(255,255,255,0.08);--border-s:rgba(255,255,255,0.15);--text:#f0f0f0;--t2:#aaa;--t3:#555;--radius:8px;--radius-lg:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+#lock{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.lock-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px 32px;max-width:380px;width:100%;text-align:center}
+.lock-logo img{width:60px;height:60px;border-radius:10px;margin-bottom:16px}
+.lock-box h1{font-size:22px;font-weight:600;margin-bottom:4px}
+.lock-box p{font-size:13px;color:var(--t2);margin-bottom:24px}
+.lock-box input{width:100%;padding:12px 16px;font-size:15px;background:var(--card);border:1px solid var(--border-s);border-radius:var(--radius);color:var(--text);margin-bottom:10px;outline:none}
+.lock-box input:focus{border-color:var(--brand-lt)}
+.lock-btn{width:100%;padding:12px;background:var(--brand);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer}
+.lock-btn:hover{background:var(--brand-lt)}
+.lock-err{color:#ff6b6b;font-size:13px;margin-top:8px;display:none}
+.lock-hint{font-size:11px;color:var(--t3);margin-top:14px}
+#app{display:none}
+.hdr{background:var(--brand);position:sticky;top:0;z-index:100}
+.hdr-inner{display:flex;align-items:center;gap:12px;padding:12px 20px}
+.hdr-logo{width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0}
+.hdr-title{font-size:17px;font-weight:700;letter-spacing:.5px;color:#fff}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:1px}
+.nav{background:var(--surface);border-bottom:1px solid var(--border);display:flex;overflow-x:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{padding:12px 16px;font-size:13px;font-weight:500;color:var(--t2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:color .15s}
+.nav-btn.active{color:#fff;border-bottom-color:var(--brand-lt)}
+.nav-btn:hover{color:var(--text)}
+.content{padding:20px 16px;max-width:1100px;margin:0 auto}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 12px;text-align:center}
+.stat-num{font-size:30px;font-weight:700}
+.stat-lbl{font-size:10px;color:var(--t2);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.alert-box{background:rgba(139,0,0,.15);border:1px solid rgba(180,0,0,.35);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px}
+.alert-title{font-size:13px;font-weight:600;color:#ff9999;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.alert-item{font-size:13px;color:#ffaaaa;padding:3px 0;display:flex;align-items:center;gap:8px}
+.section-title{font-size:13px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.dog-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .1s}
+.dog-card:hover{border-color:var(--brand-lt);transform:translateY(-2px)}
+.dog-photo{width:100%;height:150px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:48px;overflow:hidden}
+.dog-photo img{width:100%;height:100%;object-fit:cover}
+.dog-info-card{padding:10px 12px 12px}
+.dog-name-card{font-size:14px;font-weight:600;margin-bottom:2px}
+.dog-id-card{font-size:10px;color:var(--t3);margin-bottom:7px}
+.tag-row{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.t-male{background:#1a3a6e;color:#7ab3f0}.t-female{background:#5a1a4a;color:#f0a0d0}
+.t-friendly{background:#1a4a25;color:#80cc90}.t-aggressive{background:#4a1515;color:#f08080}
+.t-shy{background:#4a3a10;color:#e0b860}.t-neutral{background:#2a2a2a;color:#aaa}
+.t-done{background:#1a4a25;color:#80cc90}.t-due{background:#4a1515;color:#f08080}
+.t-pending{background:#4a3a10;color:#e0b860}.t-sterilized{background:#1a3a5a;color:#80b0e0}
+.t-campus{background:#1a3a1a;color:#70b070}
+.search-bar{width:100%;padding:11px 16px;font-size:14px;background:var(--surface);border:1px solid var(--border-s);border-radius:var(--radius);color:var(--text);margin-bottom:12px;outline:none}
+.search-bar:focus{border-color:var(--brand-lt)}
+.filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.f-btn{font-size:12px;padding:6px 14px;border:1px solid var(--border-s);border-radius:20px;background:none;color:var(--t2);cursor:pointer}
+.f-btn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px}
+th{text-align:left;padding:10px 12px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--t2);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;cursor:pointer;margin-bottom:20px}
+.back-btn:hover{color:var(--text);border-color:var(--border-s)}
+.profile-wrap{max-width:680px}
+.profile-hero-img{width:100%;height:240px;background:var(--surface);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:80px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border)}
+.profile-hero-img img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg)}
+.profile-name{font-size:26px;font-weight:700;margin-bottom:3px}
+.profile-id{font-size:12px;color:var(--t3);margin-bottom:12px}
+.profile-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.info-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.info-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.info-val{font-size:13px;color:var(--text)}
+.notes-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
+.notes-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.notes-val{font-size:13px;color:var(--text);line-height:1.7}
+.notes-empty{color:var(--t3);font-style:italic}
+.doc-link{color:#7ab3f0;text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.days-red{color:#ff6b6b;font-weight:600}.days-amber{color:#ffb347;font-weight:600}.days-green{color:#80cc90}
+.tab{display:none}.tab.active{display:block}
+.sync-bar{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--t2)}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#80cc90;flex-shrink:0}
+.sync-dot.syncing{background:#ffb347;animation:pulse 1s infinite}
+.sync-dot.error{background:#ff6b6b}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:500px){.info-grid{grid-template-columns:1fr}.gallery{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}.stats-grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <div class="lock-box">
+    <div class="lock-logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAYAAAA+s9J6AAAYf0lEQVR4nO3de3wU5bkH8N/M7CbZbLLJhiUOgRAJy1UIBCKnFAggFawFLJeKVqDngFIUT71VW2gJFRVswVNOq5VatBWxrW2RU+Qu94tcDNeC3BIgQMIaNlly2d1sdmfm/LEkTUjIdTPvTPb5fj7+wWR35zHLj3fmnffCrRftCgghzPCsCyAk3FEICWGMQkgIYxRCQhijEBLCGIWQEMYohIQwRiEkhDEKISGMUQgJYYxCSAhjFEJCGKMQEsIYhZAQxiiEhDBGISSEMQohIYxRCAlhjEJICGMUQkIYoxASwhiFkBDGKISEMEYhJIQxCiEhjFEICWGMQkgIYxRCQhijEBLCGIWQEMYohIQwRiEkhDEKISGMUQgJYYxCSAhjFEJCGKMQEsIYhZAQxiiEOqf4/FB8ftZlkFagEOqYXOZF/APDYBmWQUHUMQqhjknufPTPmo8eLzyLgCuPdTmkhQysCyAtI5d5kThtJqxp/WAFEJMxAhW5V8FFGlmXRpqJWkKdktz5uG/By9V/TntrCbWGOkUh1CG5zIv4sRNgTetXfUzMHI74sRMgl3kZVkZagkKoQ5I7H+nLltQ5nr5sCSR3PoOKSGtQCHVGLvEgcfqsWq1gFWtaPyROm0mtoc5QCHVG8hYgLWvBXX+e9loWtYY6QyHUEdlRii7PvwxLj+53fY2lR3ckTp8FucSjYmWkNSiEOiKhEP1febHR16VlLYDsvalCRSQUKIQ6ITmKkJr1GkydxEZfa+nRHUnz5kF2lKpQGWktbr1oV1gXQRqmBCRAkvGd62chRJua9B7P9QJsSe4Mo2hv4+pIa1FLqAMB52X0W/lWkwMIANFdknDvTxdSa6gD1BJqnOLzI6p7V4z9cm+z31tZ7MKGDgnUGmoctYQaF3DlYdC7K1r03ogEK1KzXoPkcIW2KBJSFEINq3owb8sY1OLP6DX3SQC37yuJJlEINUoJSFC85Rj8qzda9TmmTiLuffVFyM5boSmMhByFUKMk53X0XfWbJj2SaEzfZ58GQK2hVlEINUjx+WHO+AZ6zv5BSD4vIsEK+/JF1BpqFIVQgwKuPKS9VXeWRGv0eXoOZFAHjRZRCDVGLvEgcdpMiJnDQ/q5QrQJPZevgOQoDOnnktajEGqM4i3HoOVL2+Sze8+ZDc4cS/eGGkMh1BDJUYjUpQsR3SWpTT7fEBuDbj9/nu4NNYZGzGiEEpDAGQQ8nHuqWcPTmitQVo4Nlq7gbfHgDEKbnYc0HbWEGiE5r6PPr15t0wACwdYwdekCyE4aU6oV1BJqQNUsiYnFV1Q5X6CsHOstsTSmVCOoJdSAgPMy0j96V7XzGWJjkPrqG5AcRaqdk9wdhZAxxedHTMYIJH/n26qet++zT4ODgXpKNYBCyFjAlYc+v5iv+nkjEqxIefV5ujfUAAohQ4rPD/PAoaq3glWCY0r91BoyRiFkSHIVoHfWT5mdPyLBitSlC6k1ZIxCyEhV65MyaSLTOvrOmwsZ1EHDEoWQEdlZhD7v/o51GTDExsC+dBn1lDJEIWTGiJRHxrMuAsDtMaXUU8oMhZABucQDcc7jIZmwGwoRCVakZP0IirOcdSlhiULIgOQtgP2p/2JdRi295j4JCbRqNwsUQpUpAQlRvdJbtXhTWzB1EtF53vO0hwUDFEKVKc5yJE2bzLqMevWcMxuSt4B1GWGHQqgyCTeRMuW7rMuolzWtH6J6pUPx+VmXElYohAzUt8GnVvT82Y8huZysywgrFEIVySUeJM15lnUZDer8rQfAgSb7qolCqCLZW4LEMaNYl9EgUycRlrEj6ZJURRRCFSlww5Y+kHUZjUqaNBGyi8aTqoVCqBIlIMEo2hEt3sO6lEbF9+1Na5SqiEKoFkmGqUc3GGJjWFfSKD201u0JhVAlSmUAUSnJrMtoEk4QEJnch8aSqoRCqBa3HzGp3VhX0SRCtAmmPnZAklmXEhYohCpR4EeURgZsN0WE1QqlMsC6jLBAIVSNBN5oZF1E0xkNrCsIGxRC1QiQ/fp59iZ7K1iXEDYohCrhYETFDQfrMppE8nhRcuAIOFME61LCAoVQLWYjyi9dZl1Fk7jzC+B35NBeFSqhEKqEizDAc+4i6zKapGDHLvCwsi4jbFAIVcJFGuHJPg2vDi5JL634HXhbPOsywgaFUEUKyuE8dpx1GQ3KW7cevvOn6VJURRRCFfHmROT99R+sy2jQqWdegmDrwrqMsEIhVBEfa0Lhmg80e0l6buUqBBw3qBVUGYVQZQIScfY37Bf9vZPnegHOPv0MDGIn1qWEHQqhynjRgitvvobSi7msS6nl0Oy54M2JrMsISxRCBgzWFBx8dAbrMqqdenM5SrZtAR/btlt1k/pRCBngIo2oOJGD/TNmsy4FzuxjyJn/MgxiCutSwhaFkBFejMPNNZ/g0A//m1kN3hsOHMicAINNH1Os2isKIUMGsRMc763GznETIXm8qp5b8nix9+HJAM9RbyhjFELGBDERZdsOY8fIcaoG8eCsuag4kUv3gRpAIdQAXrTAm30eux56RJUgnli8BDc/+Qt40dLm5yKNa7chVAJSo/9pCS9a4N53EnsmTWvT81x4/0NcWvQzTXfEaPH7aUvcetGusC6ipZSABMXtg+L1QkElFLgBADys4G3xEExR4KKjar/HUwHZ74dc5oXsvlX9Hg5mcIgAByM4qwlcJJtZ8JKjCLbpkzD8o/dD/tn5O3fj8JjRMIr2kH92UygBCYq3Eoq7AoAfCrxQEJzozMEIDhZwpkiA54JvkBXA64cCH2SU1nidCYARnDkKnClC9/e0ugnhv7/AsuovJDK5D2wTxyGu330w3ZMIc3IXRIsiOIGHEBkJISoYQCE6eN9TdamnSBJkvx8BjxcBrxeVJSUovXQZlcUulJ6/gFv7D6E8e1/1uXlYwJliwJkjVfnC/Y4c9Fy+Av1eei5kn1l6MRfbe9phsHVr8/+HmmFTUFodNKNoh/VbmbDc1wdRHTvCJCbCdM89iBaDa+9wQvDCTIiMrP4syeeDcnvBKV9xMTxOJ9yX81Bx8yZuZR9H8drN1Wuk8rCCM0frLpiaDqESkKA43ZBQCAGJ6DB9PBJHZaLj/YNV2VTFe8MBd34Bik/+C67jJ3DrwGG4TxwEB2PwC2/DFtPvyME39+yDmDm81Z9VWezC5q792+wvZ9UViewtgQJ3ddjiB6bBmj4AscnJsPToHvLzVgmUlePW+QtwZh+D88BBFK3bCsmdDwEdwVmjmV3VNJUmQ6j4/Ai48mAU7bjnsUnoOmkiOmYMrm7RWKosduHmiZO4uWc/Cjdtgyf7JBRI4E1x4OOiQ3YeJSBBMEXhoXNHW/3/vXPcRJTtOxra+nx+yK5SyHAhqlc6LPenI2nCw7ClD4S5cxLT70ryeOH66iwKtu/EjU8+hfvEQQjoCF6MY1ZTQzQVQrnMC8mdD8uIB9HrJy8gafQoTQSvId4bDhQeOoIbWz5HwXtvAwgO0uZs5la3OpKjEPbli1t1WXpu5arbA7Nb3xFT8z7aMuJBdPn+o0gaM7pNW7lQKL2Yi0tr/oJLixeCgxGCNUlTraMmQlgVvsRpM5H2Wpbmv9SGOLOP4fpnm1DwyaeoOH+81YH0O3IwWWn5V/Qpx7WqIyYYvEIAQMfpM5A8+RF0/tYDuljOvz7XNm7G+V/+GqX7Podg7qyJ56TMQ+h35CB+7ASkL1ui6c0zW8KZfQxX1/4fbnz8D/iunYVgSmr2JaHfkYPML4+2aI9716nT2DWgf7NDqAQkyM4iAEDClPFIeWKaroNXH8fe/Ti3bAWKN6yFwZrCtGVktsJrVeuXtvpj2Gd8n1UZbcqWMQi2jEGQFs7HzeyjyPnDH1G45gPwsIC3Wpv8xftKW7ZNmWBq+r/yNTvBonqlw/7mIiQ/PA4mHa0a3hxi5nCImcPh2LsfJ597Be4TB1XpOa4Pk5ZQchQhZkQGhn2yut1+yXcTKCvHpb+txZWV76M8e1+DraMSkBBwXsbE0rIWt0K7J0zFrQ2fQxDrzhWsepQgufMhmJKQ/NxsdHv80XZ3RdIUeevW48TkpwCTIaQdWE2hegglRyHEOTPxjd//Vs3TapIz+xjO/e87cK75JxSUgkc8YDIC3gBkuMFBwP07/onOD4xq8TkkjxfZryxAwTvvQIEfHMwAghuWCqYkxI0Ziu5zZ+uiE6ytVf2uHH/6u6r3iqqGUC7xIPm52Ri0dDE81wvgKy6GVFlZ/fOIuDhEdUhAREJ4rXlZWezC1wcPwfWvM/Bez4cxNhYx9u64d9LEkP0uvDccKD57Dt78AvCRkbD27gVzl85h97sGUP13z3frFjyOr1FZ7ELFDQd8RUUoO3UGnrPqLnysekvIG43wXTvb6OtiMkZAnDIRHYZkoOPAAWH5l4W0juTxojQnFze/PIriI9ko/PtnCLjyar2m5nBFmAyqjYqqVQPr3tG7CT4MLoeMIvDogPjxo9Bt1kx0Gfdg2F82kYY5s4/h0sd/xdd/XQe/I0f1YYfNpdkQ3qnqeRWPeHRf/jP0njO7XXWZk9a7tnEzzv5iabDDK0QDJtSgmxBWCT7DugUZLtiXLsN9P5pHLWOYc2Yfw5HpT6Li/HHmz/xaQnchrElyFMKY3BmD17wXkoHORH9Ovbk8uFCVDsNXRdeTegUxEZK3Al+MHIFj87NYl0NUJHm82Dv1CeTOXwCjaNdtAAGdt4Q1SY5CRGcMwKit/6Se1Hau9GIudvX8JpMH621B1y1hTYKYCO+ZXHw+cBg81wtYl0PaSM5Hf8aOnn3A2cztIoBAOwohAPBx0ZDKPdiWnAbXqdOsyyEhVFnswu4JU3Fq5hMwiCm66PVsqnYVQiC4ujVvs2DXgP44t3IV63JICJxbuQobOiSgZNchZuvjtKV2c09Yn4AjD3FjH0LG27/W9RzFcJW/czdOPvMifOcvtOvdotpdS1iTQUxB2YFj2N7TjhOLXkegrJx1SaQJHHv3Y+e4iTg8ZjQChcXtOoBAO28Ja5IdpZBQCPvSZejxg+lhN4VKD/J37saZn2QFR7xoZNa7GsImhFUkRxEACbbpU3Hfyy+E5dw5LaksduHqxs248MZy3Y54aa2wC2EVucQDyVsA88Ch6Dx9GlKnfQ/RXZJYlxU2nNnHkPunj3DjnQ+gQIJgS2xXPZ7NEbYhrFJz6b7I5D5Iee6H6PzgGFjs3WlMaoi5Tp3GtU1bcPn1FdWz+dvLs77WCPsQ1hQcHF4KGUUwinbEDRuChKFDqJVsIcnjRd6GTSjcsRvFew7cXn2uIzhbTNi2evVhttCTFnEGAYJohQArlIAE59o/I1JMpAC2kBBtQuGO3Sh4720YbN3a5TO+UKCW8C5kRwk6TJ/QJhuzhJv1HVMBgFq/u2jXzwlbSvH5ETXQjqG/f5t1Ke3CkLWrEXBeZl2GZlEI6xFw5WHIh+9Rx0yIiJnD0Xne85AdLVs/tb2jEN5BdpQgNes13T0/lDxeVBa7WJdxV+mLs6CgIqw2/2wqCuEdJNxE/5+8xLqMZlMkCVvvG4L8nbtZl1KviAQrer/7VvXy+uTfKIQ1SA4XUl99Q/OXoYGycjj27q91jBME8EYjDo8ZjROLXmdUWcN6z30yuDsvtYa1UAhr8aPXU7NYF9Goo/MXwldUXO/PDLZuuLJ4GTZ27Qtn9jGVK2tc/9V/guS8zroMTaEQ3iaXeWGb9l3ND+w+t3IV8t9ZAcnvv+trBDERUrkHe+8fjBOLXq/eJlwLuk2ZhIhkO7WGNVAIb5PdhUiZ8RjrMhp05IVX8NXTT4GHpdFpWVykEUbRjiuLl2FL78GauVcUok3ovuBFujesgUJYQ6fMEaxLqFf+zt34rFMPFKxYdXvUiQC5npaQi46qc6xqRbrDY0Zj79QnNLH+jv2JxwAI1BreRiFE8FK0w5TvaW5Fb8fe/dg9YSoOjxkd3MNe7HD7JzwCbnet1zbUmcQZBBhFO1ybdmNrck+cWLyE6SWqITYGXX/6LBSnu/EXhwEKIQDFXYGEoUNYlwEguGPQuZWrsO3+THwxckT1uio1h3xxEOqEEAAEU92WsCY+LhoGsROuLFqODTY7Lrz/Ycjrb6pujz8KCYXMzq8lNIAbgIwiiCPZXIpWFrtQeukyHHv24eofPkTF+ePgYQVvtdx9wLPJgIr8G/X/TJKBRsZoCmIHKAEJZ56ch9NP/ifSVn+MblMmqfpoxprWD0Yx2EET7mNKKYS3mTu3/UwJyeOFO78ArtNnUHQkG8UHDsGdfQaStyAYPFt802Ya8Bw8V/LqHOYMTf86OYMAg9gJSkDCv2bOwVcv/hz3vvSMqkt/dPvxs8j58as1LrPDE82iAOB35GCyEvpfQ+nFXJRcuICiI0dReuYsXFv2QHLng4MZPMzgrCZA4JvdEigBCZFdRIw7/kWt49szx8Jz+kKLloeoOZcycfospDw2Fcnf+XazP6c5Si/mYntPe9hPcQr7llDx+RGT0fpL0apWrmDHLjg2bkHxhrUAAA7G4DbY5ghwpggYY0PzF67iRG6dY4Y4C5TKQItCWHMuZdG6rbi55iN8CT8Sp8+COHYMEr/xHyHfRdnSozuieqUjUHQrrC9JKYQVflgGDWjReyWPFzezjyLvb2vhXL8VvmtnwcMKzhzdpv+6cwYBgXo6NQzxcSH5fD7WBD42BQBQtG4rnGv+ARmlMFhTEJmSBHO/PrANG4r4vr1hSx/Yql7lhJHD8PVHn4IL42Uuwj6E8PoR3S2lWW8pvZiLS2v+gqu/XYWAKw+CKQmcOZL5ZVWErQMgh/aymo81AbEmCEiEEpDgyytAxcWrcK5ZBxnBWRuWEQ/CNjoT4phR6JgxuFkdPIljRuHGe38M67Vmwj6ECgKIiI9v0mvzd+7G+V/+D25t+6x6J1iWwassdtW6PIy6JxHw+oHQNIh1cAYBMAjBy91YEwQEO1Q8py8gb99JXFq8EACQMH4Kus54HJ1GDGu0k8fauxcUhPfzwrAPIQDwxobvofLWrcf5JcurF6Vl3eJVqSgqrhXC6M5JUOBTvQ4u0ghONIKHBQBQsusQTm7YglMQED/+QXSfOxtJo0fV20Ja7LQ9AT2shwQ+ov4Q5q1bj029B+Ho5EdQkXsVRtGuqVWhK0tKav3ZGBMDBeyHgvGxJhjEThDERJTsOoTs8Y9gg/leHJufhdKLtTuUhGgTonqlh/UQNgohALmy9jjMaxs347NOPXB08iMIFBZrdifYgMdT68+RHRI0d2kXDGQKOJsZ1978Pbb3tGP3hKm15kNG90iF4q1kWCVbFMIag6Gd2cewPXMsvhz/MJSApNnwAQAHMzyOr2sdi+uhjcvk+nAGAbwYHAVUsusQvhg5Atszx8Kxdz+iktr3hi+NCft7Qs5kQsnpM9j/2A9Q+MlqGKwpmrnnawiHKHiu1Z4cGxHXRj0yIRZ8BGKH5/QFHBz5EASrTVOX+WoL+xDycdFwfPA3gOd0Eb4qHARU3jEnT4g2wTxwKHzXHbp4+M1FGtv9tmdNQZejCAZRd/8Sm43wXM+ve7hfn7C+v9IjCqFOcREGVORdq3M8fmAaFHcFg4pIS1EI9UrggzMw7pica7t/MGTQ0hF6QiHUKc4gQPIWQKqo3epZUlMZVURaikKoc6WXau/xQDtI6Q+FUMc4mOuEEAAik/uE9QgUvaEQ6hgPM24dP1nnuHlAX+oh1REKoZ6ZjSg9/VWdw6aU5JBPaSJth0KoY1yEAZWOupN7jbGxgDfAoCLSEhRCPRN4KAEKm95RCPVMkutdYS1QUQGYwn5Eom5QCHXOkBBf55gn5xLAc+oXQ1qEQqhjSoUf5h51Z6a7T34FzhTBoCLSEhRCHZO9JeiYObzOcd+1s7qYRUGCKIQ6psANW/rAWse0sOsSaR4KoU5VLVpsueNy1HXhAjhoczUAUj8KoU5JLidSfzS3zvGbe/aDR+hWySZtj0KoQ0pAAoco2Gd8v87PCjdtC+5xQXSDQqhDitONe7Oer3O89GIuyrP3aXZxKlI/CqEO8aIFVxYvw85xE3Ft4+bq4wU7dtGlqA7R1mg6Jpd5IbnzYRTtGLjqNzj7i6WouHKdHk/oDIWwHVACEiRnIQRbIgVQh2iAYTtQtesu0Se6JySEMQohIYxRCAlhjEJICGMUQkIYoxASwhiFkBDGKISEMEYhJIQxCiEhjFEICWGMQkgIYxRCQhijEBLCGIWQEMYohIQwRiEkhDEKISGMUQgJYYxCSAhjFEJCGKMQEsIYhZAQxiiEhDBGISSEMQohIYxRCAlhjEJICGMUQkIYoxASwhiFkBDGKISEMEYhJIQxCiEhjFEICWGMQkgIYxRCQhijEBLCGIWQEMYohIQwRiEkhDEKISGM/T+LF1VlzRMZQAAAAABJRU5ErkJggg==" alt="Nirlon"></div>
+    <h1>NKP Campus Dogs</h1>
+    <p>Nirlon Knowledge Park · Mumbai<br>Enter your password to continue.</p>
+    <input type="password" id="pw" placeholder="Enter password">
+    <div class="lock-err" id="pwErr">Incorrect password. Please try again.</div>
+    <button class="lock-btn" onclick="unlock()">Enter Database</button>
+    <div class="lock-hint">Contact the NKP dog welfare team for access.</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-inner">
+      <img class="hdr-logo" src="data:image/png;base64,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" alt="Nirlon">
+      <div>
+        <div class="hdr-title">NKP CAMPUS DOGS</div>
+        <div class="hdr-sub">Nirlon Knowledge Park · Mumbai · Dog Welfare &amp; Medical Database</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="showTab('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+    <button class="nav-btn" onclick="showTab('gallery',this)"><i class="ti ti-grid-dots"></i> Gallery</button>
+    <button class="nav-btn" onclick="showTab('allDogs',this)"><i class="ti ti-list"></i> All Dogs</button>
+    <button class="nav-btn" onclick="showTab('vacc',this)"><i class="ti ti-vaccine"></i> Vaccination</button>
+    <button class="nav-btn" id="profileNavBtn" style="display:none" onclick="showTab('profile',this)"><i class="ti ti-dog"></i> Profile</button>
+  </div>
+  <div class="content">
+    <div id="tab-dashboard" class="tab active">
+      <div class="sync-bar"><div class="sync-dot syncing" id="syncDot"></div><span id="syncMsg">Connecting to Google Sheet...</span></div>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-num" style="color:#c084fc" id="s-total">—</div><div class="stat-lbl">Total Dogs</div></div>
+        <div class="stat"><div class="stat-num" style="color:#60a5fa" id="s-male">—</div><div class="stat-lbl">Male</div></div>
+        <div class="stat"><div class="stat-num" style="color:#f472b6" id="s-female">—</div><div class="stat-lbl">Female</div></div>
+        <div class="stat"><div class="stat-num" style="color:#4ade80" id="s-vdone">—</div><div class="stat-lbl">Vaccinated</div></div>
+        <div class="stat"><div class="stat-num" style="color:#f87171" id="s-vdue">—</div><div class="stat-lbl">Vacc Due</div></div>
+        <div class="stat"><div class="stat-num" style="color:#4ade80" id="s-sdone">—</div><div class="stat-lbl">Sterilized</div></div>
+        <div class="stat"><div class="stat-num" style="color:#f87171" id="s-spend">—</div><div class="stat-lbl">Steril. Pending</div></div>
+        <div class="stat"><div class="stat-num" style="color:#34d399" id="s-collar">—</div><div class="stat-lbl">Collared</div></div>
+      </div>
+      <div id="alertBox"></div>
+      <div class="section-title"><i class="ti ti-grid-dots"></i> Named dogs — quick view</div>
+      <div class="gallery" id="dashGallery"></div>
+    </div>
+    <div id="tab-gallery" class="tab">
+      <input class="search-bar" type="text" id="gallerySearch" placeholder="Search by name, territory, temperament..." oninput="renderGallery()">
+      <div class="filter-row">
+        <button class="f-btn active" onclick="setFilter('all',this)">All</button>
+        <button class="f-btn" onclick="setFilter('Friendly',this)">Friendly</button>
+        <button class="f-btn" onclick="setFilter('Aggressive',this)">Aggressive</button>
+        <button class="f-btn" onclick="setFilter('Shy',this)">Shy</button>
+        <button class="f-btn" onclick="setFilter('Male',this)">Male</button>
+        <button class="f-btn" onclick="setFilter('Female',this)">Female</button>
+        <button class="f-btn" onclick="setFilter('due',this)">Vacc Due</button>
+      </div>
+      <div class="gallery" id="mainGallery"></div>
+    </div>
+    <div id="tab-allDogs" class="tab">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Dog ID</th><th>Name</th><th>Sex</th><th>Temperament</th><th>Territory</th><th>Pack</th><th>Vaccination</th><th>Sterilization</th></tr></thead>
+        <tbody id="dogTable"></tbody>
+      </table></div>
+    </div>
+    <div id="tab-vacc" class="tab">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Dog ID</th><th>Name</th><th>Sex</th><th>Territory</th><th>Vacc Status</th><th>Next Due Date</th><th>Sterilization</th></tr></thead>
+        <tbody id="vaccTable"></tbody>
+      </table></div>
+    </div>
+    <div id="tab-profile" class="tab">
+      <button class="back-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="profile-wrap" id="profileContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+// ★  CONFIGURATION — only edit this section  ★
+// ════════════════════════════════════════════════════
+const PASSWORD = 'Nirlondogs2026';
+
+// After you publish your Google Sheet as CSV (see the setup guide),
+// paste the link here between the quotes:
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZDAobEEf1y6P40HrJC9PLz0n6mnmaA_06FlI4a3WAn5U4QazzC49nL2nnQIf8IeySsqd1sdLb9IWe/pub?gid=998187128&single=true&output=csv';
+// ════════════════════════════════════════════════════
+
+let DOGS = [], activeFilter = 'all', prevTab = 'gallery', currentTab = 'dashboard';
+
+// ── PASSWORD ─────────────────────────────
+function unlock() {
+  if (document.getElementById('pw').value === PASSWORD) {
+    document.getElementById('lock').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadData();
+  } else { document.getElementById('pwErr').style.display = 'block'; }
+}
+document.getElementById('pw').addEventListener('keydown', e => { if(e.key==='Enter') unlock(); });
+
+// ── LOAD DATA FROM GOOGLE SHEET ──────────
+async function loadData() {
+  setSyncStatus('syncing','Loading live data from Google Sheet...');
+  try {
+    const res = await fetch(SHEET_CSV_URL + '&cachebust=' + Date.now());
+    if (!res.ok) throw new Error('fetch failed');
+    const csv = await res.text();
+    DOGS = parseCSV(csv);
+    if (DOGS.length === 0) throw new Error('no data parsed');
+    setSyncStatus('ok', 'Live data loaded from Google Sheet ✓ — updates automatically when you edit the Sheet');
+  } catch(e) {
+    DOGS = FALLBACK_DOGS;
+    setSyncStatus('error', 'Could not reach Google Sheet. Showing built-in data. Check your CSV URL in the config section.');
+  }
+  renderAll();
+}
+
+function setSyncStatus(state, msg) {
+  document.getElementById('syncDot').className = 'sync-dot' + (state==='syncing'?' syncing':state==='error'?' error':'');
+  document.getElementById('syncMsg').textContent = msg;
+}
+
+// ── CSV PARSER ───────────────────────────
+function parseCSV(csv) {
+  const lines = csv.trim().split('\n');
+  // Your sheet has 4 header rows (title, subtitle, instructions, column headers)
+  // So data starts at line index 4
+  return lines.slice(4).map(parseLine)
+    .filter(f => f[0] && f[0].startsWith('DOG-'))
+    .map(f => ({
+      id:f[0]||'', name:f[1]||'', sex:f[2]||'', temperament:f[3]||'',
+      territory:f[4]||'', pack:f[5]||'', vacc:f[6]||'', nextDue:f[7]||'',
+      steril:f[8]||'', sterilDate:f[9]||'', collar:f[10]||'',
+      collarDetail:f[11]||'', marks:f[12]||'', medNotes:f[13]||'',
+      docLink:f[14]||'', photoLink:f[15]||'', remarks:f[16]||'', campusStatus:f[17]||''
+    }));
+}
+
+function parseLine(line) {
+  const fields = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { inQ = !inQ; }
+    else if (line[i] === ',' && !inQ) { fields.push(cur.trim()); cur = ''; }
+    else { cur += line[i]; }
+  }
+  fields.push(cur.trim());
+  return fields;
+}
+
+// ── FALLBACK DATA ────────────────────────
+const FALLBACK_DOGS = [
+  {id:'DOG-001',name:'Bholu',sex:'Male',temperament:'Friendly',territory:'TWP area, Canteen Pathway & smoking zone',pack:'No',vacc:'Done',nextDue:'26.07.2026',steril:'Pending',sterilDate:'',collar:'Yes',collarDetail:'',marks:'Grey muzzle, large build',medNotes:'Senior dog, generally healthy.',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-002',name:'Bella',sex:'Female',temperament:'Friendly',territory:'B7 North side pocket park',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-003',name:'Tuffy',sex:'Female',temperament:'Aggressive/Friendly',territory:'TWP area, Canteen Pathway',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-004',name:'Kuki',sex:'Female',temperament:'Friendly',territory:'Near or Outside Gate no. 27',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-005',name:'Picku',sex:'Male',temperament:'Friendly',territory:'B7 North side pocket park',pack:'No',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'No',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-006',name:'Happy',sex:'Female',temperament:'Friendly',territory:'Gate no. 14 area',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-014',name:'Mowgli',sex:'Male',temperament:'Friendly',territory:'B1 South side / Samadhi Area',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-030',name:'Husky',sex:'Male',temperament:'Aggressive',territory:'B07 South Side / Phase 5',pack:'Yes',vacc:'Done',nextDue:'12.12.2026',steril:'Done',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-031',name:'Lochi',sex:'Female',temperament:'Shy/Aggressive',territory:'OWC area',pack:'Yes',vacc:'Done',nextDue:'10.01.2027',steril:'Pending',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-032',name:'Moti',sex:'Male',temperament:'Aggressive',territory:'Oracle Junction',pack:'Yes',vacc:'Due',nextDue:'',steril:'Pending',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-033',name:'Juli',sex:'Female',temperament:'Aggressive',territory:'MLCP Back Side area',pack:'Yes',vacc:'Done',nextDue:'10.01.2027',steril:'Pending',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+];
+
+// ── HELPERS ──────────────────────────────
+const dn = d => d.name || 'Unnamed';
+function tClass(t) {
+  if (!t) return 't-neutral';
+  const l = t.toLowerCase();
+  return l.includes('friendly') ? 't-friendly' : l.includes('aggressive') ? 't-aggressive' : l.includes('shy') ? 't-shy' : 't-neutral';
+}
+function vClass(v) { return v==='Done'?'t-done':v==='Due'?'t-due':'t-pending'; }
+function nameHtml(d) { return d.name || '<span style="color:var(--t3);font-style:italic">Unnamed</span>'; }
+function photoHtml(d, size) {
+  if (!d.photoLink) return size==='big' ? '🐕' : '🐕';
+  return `<img src="${d.photoLink}" alt="${dn(d)}" onerror="this.parentElement.innerHTML='🐕'">`;
+}
+
+function dogCard(d) {
+  return `<div class="dog-card" onclick="openProfile('${d.id}')">
+    <div class="dog-photo">${photoHtml(d)}</div>
+    <div class="dog-info-card">
+      <div class="dog-name-card">${nameHtml(d)}</div>
+      <div class="dog-id-card">${d.id} · ${(d.territory||'').split(',')[0]}</div>
+      <div class="tag-row">
+        <span class="tag ${d.sex==='Female'?'t-female':'t-male'}">${d.sex}</span>
+        ${d.temperament?`<span class="tag ${tClass(d.temperament)}">${d.temperament}</span>`:''}
+        ${d.vacc==='Due'?'<span class="tag t-due">Vacc Due</span>':''}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── RENDER ALL ────────────────────────────
+function renderAll() {
+  // Stats
+  const s = {total:DOGS.length,male:0,female:0,vdone:0,vdue:0,sdone:0,spend:0,collar:0};
+  DOGS.forEach(d=>{
+    if(d.sex==='Male') s.male++; if(d.sex==='Female') s.female++;
+    if(d.vacc==='Done') s.vdone++; if(d.vacc==='Due') s.vdue++;
+    if(d.steril==='Done') s.sdone++; if(d.steril==='Pending') s.spend++;
+    if(d.collar==='Yes') s.collar++;
+  });
+  Object.keys(s).forEach(k=>{ const el=document.getElementById('s-'+k); if(el) el.textContent=s[k]; });
+
+  // Alerts
+  const due = DOGS.filter(d=>d.vacc==='Due');
+  document.getElementById('alertBox').innerHTML = due.length ? `
+    <div class="alert-box">
+      <div class="alert-title"><i class="ti ti-alert-triangle"></i> Vaccination overdue — ${due.length} dog${due.length>1?'s':''} need action now</div>
+      ${due.map(d=>`<div class="alert-item"><i class="ti ti-circle-filled" style="font-size:7px"></i> <strong>${dn(d)}</strong> (${d.id}) · ${d.territory}</div>`).join('')}
+    </div>` : '';
+
+  // Dashboard gallery — named dogs only
+  document.getElementById('dashGallery').innerHTML = DOGS.filter(d=>d.name).slice(0,8).map(dogCard).join('');
+
+  renderGallery();
+  renderTable();
+  renderVacc();
+}
+
+function renderGallery() {
+  const q = (document.getElementById('gallerySearch')||{value:''}).value.toLowerCase();
+  let list = DOGS;
+  if (activeFilter==='due') list=list.filter(d=>d.vacc==='Due');
+  else if (activeFilter==='Male'||activeFilter==='Female') list=list.filter(d=>d.sex===activeFilter);
+  else if (activeFilter!=='all') list=list.filter(d=>d.temperament&&d.temperament.toLowerCase().includes(activeFilter.toLowerCase()));
+  if (q) list=list.filter(d=>(d.name+d.id+d.territory+d.temperament).toLowerCase().includes(q));
+  document.getElementById('mainGallery').innerHTML = list.length
+    ? list.map(dogCard).join('')
+    : '<p style="color:var(--t3);padding:20px">No dogs match.</p>';
+}
+
+function setFilter(f,btn) {
+  activeFilter=f;
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGallery();
+}
+
+function renderTable() {
+  document.getElementById('dogTable').innerHTML = DOGS.map(d=>`
+    <tr onclick="openProfile('${d.id}')">
+      <td style="color:var(--t3);font-size:11px;font-weight:500">${d.id}</td>
+      <td style="font-weight:500">${nameHtml(d)}</td>
+      <td><span class="tag ${d.sex==='Female'?'t-female':'t-male'}">${d.sex}</span></td>
+      <td>${d.temperament?`<span class="tag ${tClass(d.temperament)}">${d.temperament}</span>`:'-'}</td>
+      <td style="font-size:12px;color:var(--t2)">${d.territory}</td>
+      <td style="color:var(--t2)">${d.pack}</td>
+      <td><span class="tag ${vClass(d.vacc)}">${d.vacc}</span></td>
+      <td><span class="tag ${d.steril==='Done'?'t-sterilized':'t-pending'}">${d.steril}</span></td>
+    </tr>`).join('');
+}
+
+function renderVacc() {
+  const today = new Date();
+  document.getElementById('vaccTable').innerHTML = DOGS.map(d=>{
+    let dh='';
+    if(d.vacc==='Due'){dh='<span class="days-red"> Overdue</span>';}
+    else if(d.nextDue){
+      const p=d.nextDue.split('.');
+      if(p.length===3){const due=new Date(`${p[2]}-${p[1]}-${p[0]}`);const diff=Math.round((due-today)/86400000);
+        dh=diff<=30?`<span class="days-red"> (${diff}d)</span>`:diff<=60?`<span class="days-amber"> (${diff}d)</span>`:`<span class="days-green"> (${diff}d)</span>`;}
+    }
+    return `<tr onclick="openProfile('${d.id}')">
+      <td style="color:var(--t3);font-size:11px;font-weight:500">${d.id}</td>
+      <td style="font-weight:500">${nameHtml(d)}</td>
+      <td><span class="tag ${d.sex==='Female'?'t-female':'t-male'}">${d.sex}</span></td>
+      <td style="font-size:12px;color:var(--t2)">${d.territory}</td>
+      <td><span class="tag ${vClass(d.vacc)}">${d.vacc}</span></td>
+      <td style="color:var(--t2)">${d.nextDue||'—'}${dh}</td>
+      <td><span class="tag ${d.steril==='Done'?'t-sterilized':'t-pending'}">${d.steril}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── TABS ─────────────────────────────────
+function showTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  prevTab=currentTab; currentTab=name;
+  if(name!=='profile')document.getElementById('profileNavBtn').style.display='none';
+}
+
+// ── PROFILE ───────────────────────────────
+function openProfile(id){
+  prevTab=currentTab;
+  const d=DOGS.find(x=>x.id===id); if(!d)return;
+  document.getElementById('profileContent').innerHTML=`
+    <div class="profile-hero-img">${photoHtml(d,'big')}</div>
+    <div class="profile-name">${d.name||'<span style="color:var(--t3);font-style:italic">Unnamed Dog</span>'}</div>
+    <div class="profile-id">${d.id}</div>
+    <div class="profile-tags">
+      <span class="tag ${d.sex==='Female'?'t-female':'t-male'}">${d.sex}</span>
+      ${d.temperament?`<span class="tag ${tClass(d.temperament)}">${d.temperament}</span>`:''}
+      <span class="tag ${vClass(d.vacc)}">Vacc: ${d.vacc}</span>
+      <span class="tag ${d.steril==='Done'?'t-sterilized':'t-pending'}">Steril: ${d.steril}</span>
+      ${d.campusStatus?`<span class="tag t-campus">${d.campusStatus}</span>`:''}
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-lbl">Territory</div><div class="info-val">${d.territory||'—'}</div></div>
+      <div class="info-item"><div class="info-lbl">Next vaccination</div><div class="info-val" style="${d.vacc==='Due'?'color:#ff6b6b':''}">${d.nextDue||'Overdue'}</div></div>
+      <div class="info-item"><div class="info-lbl">Part of pack</div><div class="info-val">${d.pack||'—'}</div></div>
+      <div class="info-item"><div class="info-lbl">Sterilization date</div><div class="info-val">${d.sterilDate||'—'}</div></div>
+      <div class="info-item"><div class="info-lbl">Collar</div><div class="info-val">${d.collarDetail||d.collar||'None'}</div></div>
+      <div class="info-item"><div class="info-lbl">Distinguishing marks</div><div class="info-val">${d.marks||'—'}</div></div>
+    </div>
+    <div class="notes-block"><div class="notes-lbl"><i class="ti ti-notes"></i> Medical notes</div>
+      <div class="notes-val ${!d.medNotes?'notes-empty':''}">${d.medNotes||'No medical notes recorded.'}</div></div>
+    <div class="notes-block"><div class="notes-lbl"><i class="ti ti-folder"></i> Medical documents</div>
+      <div class="notes-val">${d.docLink?`<a class="doc-link" href="${d.docLink}" target="_blank"><i class="ti ti-external-link"></i> Open Google Drive folder</a>`:'<span class="notes-empty">No documents linked yet.</span>'}</div></div>
+    <div class="notes-block"><div class="notes-lbl"><i class="ti ti-alert-circle"></i> Remarks</div>
+      <div class="notes-val ${!d.remarks?'notes-empty':''}">${d.remarks||'None.'}</div></div>`;
+  document.getElementById('profileNavBtn').style.display='flex';
+  showTab('profile',document.getElementById('profileNavBtn'));
+}
+
+function goBack(){
+  const map={dashboard:0,gallery:1,allDogs:2,vacc:3};
+  const t=prevTab==='profile'?'gallery':prevTab;
+  showTab(t,document.querySelectorAll('.nav-btn')[map[t]??1]);
+}
+</script>
+</body>
+</html>
