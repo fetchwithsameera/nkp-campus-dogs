@@ -181,7 +181,7 @@ const PASSWORD = 'Nirlondogs2026';
 
 // After you publish your Google Sheet as CSV (see the setup guide),
 // paste the link here between the quotes:
-const SHEET_CSV_URL = 'YOUR_GOOGLE_SHEET_CSV_URL_HERE';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZDAobEEf1y6P40HrJC9PLz0n6mnmaA_06FlI4a3WAn5U4QazzC49nL2nnQIf8IeySsqd1sdLb9IWe/pub?gid=998187128&single=true&output=csv';
 // ════════════════════════════════════════════════════
 
 let DOGS = [], activeFilter = 'all', prevTab = 'gallery', currentTab = 'dashboard';
@@ -200,7 +200,8 @@ document.getElementById('pw').addEventListener('keydown', e => { if(e.key==='Ent
 async function loadData() {
   setSyncStatus('syncing','Loading live data from Google Sheet...');
   try {
-    const res = await fetch(SHEET_CSV_URL + '&cachebust=' + Date.now());
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(SHEET_CSV_URL);
+    const res = await fetch(proxyUrl);
     if (!res.ok) throw new Error('fetch failed');
     const csv = await res.text();
     DOGS = parseCSV(csv);
