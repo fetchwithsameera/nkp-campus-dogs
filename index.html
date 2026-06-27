@@ -82,6 +82,13 @@ tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
 .notes-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .notes-val{font-size:13px;color:var(--text);line-height:1.7}
 .notes-empty{color:var(--t3);font-style:italic}
+
+.album-btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:#fff;border:none;border-radius:var(--radius);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;margin-bottom:10px;transition:background .15s}
+.album-btn:hover{background:var(--brand-lt)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.photo-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer}
+.photo-grid img:hover{border-color:var(--brand-lt)}
+
 .doc-link{color:#7ab3f0;text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:6px}
 .days-red{color:#ff6b6b;font-weight:600}.days-amber{color:#ffb347;font-weight:600}.days-green{color:#80cc90}
 .tab{display:none}.tab.active{display:block}
@@ -231,7 +238,7 @@ function parseCSV(csv) {
       territory:f[4]||'', pack:f[5]||'', vacc:f[6]||'', nextDue:f[7]||'',
       steril:f[8]||'', sterilDate:f[9]||'', collar:f[10]||'',
       collarDetail:f[11]||'', marks:f[12]||'', medNotes:f[13]||'',
-      docLink:f[14]||'', photoLink:f[15]||'', remarks:f[16]||'', campusStatus:f[17]||''
+      docLink:f[14]||'', photoLink:f[15]||'', remarks:f[16]||'', campusStatus:f[17]||'', albumLink:f[18]||''
     }));
 }
 
@@ -248,17 +255,17 @@ function parseLine(line) {
 
 // ── FALLBACK DATA ────────────────────────
 const FALLBACK_DOGS = [
-  {id:'DOG-001',name:'Bholu',sex:'Male',temperament:'Friendly',territory:'TWP area, Canteen Pathway & smoking zone',pack:'No',vacc:'Done',nextDue:'26.07.2026',steril:'Pending',sterilDate:'',collar:'Yes',collarDetail:'',marks:'Grey muzzle, large build',medNotes:'Senior dog, generally healthy.',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-002',name:'Bella',sex:'Female',temperament:'Friendly',territory:'B7 North side pocket park',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-003',name:'Tuffy',sex:'Female',temperament:'Aggressive/Friendly',territory:'TWP area, Canteen Pathway',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-004',name:'Kuki',sex:'Female',temperament:'Friendly',territory:'Near or Outside Gate no. 27',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-005',name:'Picku',sex:'Male',temperament:'Friendly',territory:'B7 North side pocket park',pack:'No',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'No',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-006',name:'Happy',sex:'Female',temperament:'Friendly',territory:'Gate no. 14 area',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-014',name:'Mowgli',sex:'Male',temperament:'Friendly',territory:'B1 South side / Samadhi Area',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-030',name:'Husky',sex:'Male',temperament:'Aggressive',territory:'B07 South Side / Phase 5',pack:'Yes',vacc:'Done',nextDue:'12.12.2026',steril:'Done',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-031',name:'Lochi',sex:'Female',temperament:'Shy/Aggressive',territory:'OWC area',pack:'Yes',vacc:'Done',nextDue:'10.01.2027',steril:'Pending',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-032',name:'Moti',sex:'Male',temperament:'Aggressive',territory:'Oracle Junction',pack:'Yes',vacc:'Due',nextDue:'',steril:'Pending',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
-  {id:'DOG-033',name:'Juli',sex:'Female',temperament:'Aggressive',territory:'MLCP Back Side area',pack:'Yes',vacc:'Done',nextDue:'10.01.2027',steril:'Pending',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus'},
+  {id:'DOG-001',name:'Bholu',sex:'Male',temperament:'Friendly',territory:'TWP area, Canteen Pathway & smoking zone',pack:'No',vacc:'Done',nextDue:'26.07.2026',steril:'Pending',sterilDate:'',collar:'Yes',collarDetail:'',marks:'Grey muzzle, large build',medNotes:'Senior dog, generally healthy.',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-002',name:'Bella',sex:'Female',temperament:'Friendly',territory:'B7 North side pocket park',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-003',name:'Tuffy',sex:'Female',temperament:'Aggressive/Friendly',territory:'TWP area, Canteen Pathway',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-004',name:'Kuki',sex:'Female',temperament:'Friendly',territory:'Near or Outside Gate no. 27',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-005',name:'Picku',sex:'Male',temperament:'Friendly',territory:'B7 North side pocket park',pack:'No',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'No',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-006',name:'Happy',sex:'Female',temperament:'Friendly',territory:'Gate no. 14 area',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'Yes',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-014',name:'Mowgli',sex:'Male',temperament:'Friendly',territory:'B1 South side / Samadhi Area',pack:'Yes',vacc:'Done',nextDue:'26.07.2026',steril:'Done',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-030',name:'Husky',sex:'Male',temperament:'Aggressive',territory:'B07 South Side / Phase 5',pack:'Yes',vacc:'Done',nextDue:'12.12.2026',steril:'Done',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-031',name:'Lochi',sex:'Female',temperament:'Shy/Aggressive',territory:'OWC area',pack:'Yes',vacc:'Done',nextDue:'10.01.2027',steril:'Pending',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-032',name:'Moti',sex:'Male',temperament:'Aggressive',territory:'Oracle Junction',pack:'Yes',vacc:'Due',nextDue:'',steril:'Pending',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
+  {id:'DOG-033',name:'Juli',sex:'Female',temperament:'Aggressive',territory:'MLCP Back Side area',pack:'Yes',vacc:'Done',nextDue:'10.01.2027',steril:'Pending',sterilDate:'',collar:'',collarDetail:'',marks:'',medNotes:'',docLink:'',photoLink:'',remarks:'',campusStatus:'Always on campus',albumLink:''},
 ];
 
 // ── HELPERS ──────────────────────────────
@@ -419,6 +426,12 @@ function openProfile(id){
     </div>
     <div class="notes-block"><div class="notes-lbl"><i class="ti ti-notes"></i> Medical notes</div>
       <div class="notes-val ${!d.medNotes?'notes-empty':''}">${d.medNotes||'No medical notes recorded.'}</div></div>
+    <div class="notes-block">
+      <div class="notes-lbl"><i class="ti ti-photos"></i> Photos</div>
+      <div class="notes-val">
+        ${d.albumLink ? `<a class="album-btn" href="${d.albumLink}" target="_blank"><i class="ti ti-brand-google-photos"></i> View all photos in Google Photos</a>` : '<span class="notes-empty">No photo album linked yet. Add a Google Photos album link in column S of the Sheet.</span>'}
+      </div>
+    </div>
     <div class="notes-block"><div class="notes-lbl"><i class="ti ti-folder"></i> Medical documents</div>
       <div class="notes-val">${d.docLink?`<a class="doc-link" href="${d.docLink}" target="_blank"><i class="ti ti-external-link"></i> Open Google Drive folder</a>`:'<span class="notes-empty">No documents linked yet.</span>'}</div></div>
     <div class="notes-block"><div class="notes-lbl"><i class="ti ti-alert-circle"></i> Remarks</div>
