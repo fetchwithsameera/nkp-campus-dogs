@@ -44,7 +44,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .dog-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .1s}
 .dog-card:hover{border-color:var(--brand-lt);transform:translateY(-2px)}
 .dog-photo{width:100%;height:150px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:48px;overflow:hidden}
-.dog-photo img{width:100%;height:100%;object-fit:cover}
+.dog-photo img{width:100%;height:100%;object-fit:cover}.dog-photo iframe{width:100%;height:100%;border:none;}
 .dog-info-card{padding:10px 12px 12px}
 .dog-name-card{font-size:14px;font-weight:600;margin-bottom:2px}
 .dog-id-card{font-size:10px;color:var(--t3);margin-bottom:7px}
@@ -277,20 +277,29 @@ function tClass(t) {
 }
 function vClass(v) { return v==='Done'?'t-done':v==='Due'?'t-due':'t-pending'; }
 function nameHtml(d) { return d.name || '<span style="color:var(--t3);font-style:italic">Unnamed</span>'; }
-function getDriveImageUrl(url) {
+function getFileId(url) {
   if (!url) return null;
-  // Convert any Google Drive sharing link to a direct thumbnail URL
-  const match = url.match(/[-\w]{25,}/);
-  if (url.includes("drive.google.com") && match) {
-    return "https://drive.google.com/thumbnail?id=" + match[0] + "&sz=w400";
-  }
-  return url;
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]{25,})/);
+  if (match) return match[1];
+  const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]{25,})/);
+  if (match2) return match2[1];
+  return null;
 }
 
 function photoHtml(d, size) {
   if (!d.photoLink) return '🐕';
-  const imgUrl = getDriveImageUrl(d.photoLink);
-  return `<img src="${imgUrl}" alt="${dn(d)}" onerror="this.parentElement.innerHTML='🐕'">`;
+  const fileId = getFileId(d.photoLink);
+  if (!fileId) return '🐕';
+  // Google Drive /preview is the only URL format Google actually
+  // allows to be embedded on external websites — no CORS issues
+  const previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+  const h = size === 'big' ? '240px' : '150px';
+  return `<iframe 
+    src="${previewUrl}"
+    style="width:100%;height:${h};border:none;pointer-events:none;"
+    allow="autoplay"
+    loading="lazy">
+  </iframe>`;
 }
 
 function dogCard(d) {
