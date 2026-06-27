@@ -270,9 +270,20 @@ function tClass(t) {
 }
 function vClass(v) { return v==='Done'?'t-done':v==='Due'?'t-due':'t-pending'; }
 function nameHtml(d) { return d.name || '<span style="color:var(--t3);font-style:italic">Unnamed</span>'; }
+function getDriveImageUrl(url) {
+  if (!url) return null;
+  // Convert any Google Drive sharing link to a direct thumbnail URL
+  const match = url.match(/[-\w]{25,}/);
+  if (url.includes("drive.google.com") && match) {
+    return "https://drive.google.com/thumbnail?id=" + match[0] + "&sz=w400";
+  }
+  return url;
+}
+
 function photoHtml(d, size) {
-  if (!d.photoLink) return size==='big' ? '🐕' : '🐕';
-  return `<img src="${d.photoLink}" alt="${dn(d)}" onerror="this.parentElement.innerHTML='🐕'">`;
+  if (!d.photoLink) return '🐕';
+  const imgUrl = getDriveImageUrl(d.photoLink);
+  return `<img src="${imgUrl}" alt="${dn(d)}" onerror="this.parentElement.innerHTML='🐕'">`;
 }
 
 function dogCard(d) {
