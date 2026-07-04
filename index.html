@@ -188,7 +188,7 @@ const PASSWORD = 'Nirlondogs2026';
 
 // After you publish your Google Sheet as CSV (see the setup guide),
 // paste the link here between the quotes:
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZDAobEEf1y6P40HrJC9PLz0n6mnmaA_06FlI4a3WAn5U4QazzC49nL2nnQIf8IeySsqd1sdLb9IWe/pub?gid=2046196729&single=true&output=csv';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZDAobEEf1y6P40HrJC9PLz0n6mnmaA_06FlI4a3WAn5U4QazzC49nL2nnQIf8IeySsqd1sdLb9IWe/pub?gid=425074004&single=true&output=csv';
 // ════════════════════════════════════════════════════
 
 let DOGS = [], activeFilter = 'all', prevTab = 'gallery', currentTab = 'dashboard';
@@ -204,19 +204,50 @@ function unlock() {
 document.getElementById('pw').addEventListener('keydown', e => { if(e.key==='Enter') unlock(); });
 
 // ── LOAD DATA FROM GOOGLE SHEET ──────────
+// Multiple fetch strategies tried in order — if one fails (proxy down,
+// API changed, rate limited) the next is tried automatically.
+function getFetchStrategies() {
+  const encoded = encodeURIComponent(SHEET_CSV_URL);
+  return [
+    { name: 'direct',        url: SHEET_CSV_URL },
+    { name: 'corsproxy.io',  url: 'https://corsproxy.io/?url=' + encoded },
+    { name: 'allorigins',    url: 'https://api.allorigins.win/raw?url=' + encoded },
+    { name: 'codetabs',      url: 'https://api.codetabs.com/v1/proxy?quest=' + encoded },
+  ];
+}
+
+let retryCount = 0;
+const MAX_RETRIES = 3;
+
 async function loadData() {
   setSyncStatus('syncing','Loading live data from Google Sheet...');
-  try {
-    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(SHEET_CSV_URL);
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error('fetch failed');
-    const csv = await res.text();
-    DOGS = parseCSV(csv);
-    if (DOGS.length === 0) throw new Error('no data parsed');
-    setSyncStatus('ok', 'Live data loaded from Google Sheet ✓ — updates automatically when you edit the Sheet');
-  } catch(e) {
-    DOGS = FALLBACK_DOGS;
-    setSyncStatus('error', 'Could not reach Google Sheet. Showing built-in data. Check your CSV URL in the config section.');
+  const strategies = getFetchStrategies();
+
+  for (const strategy of strategies) {
+    try {
+      const res = await fetch(strategy.url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const csv = await res.text();
+      const parsed = parseCSV(csv);
+      if (parsed.length === 0) throw new Error('no rows parsed');
+      DOGS = parsed;
+      retryCount = 0;
+      setSyncStatus('ok', 'Live data loaded from Google Sheet ✓ — updates automatically when you edit the Sheet');
+      renderAll();
+      return;
+    } catch (e) {
+      continue; // try next strategy
+    }
+  }
+
+  // All strategies failed — fall back to built-in data
+  DOGS = FALLBACK_DOGS;
+  retryCount++;
+  if (retryCount <= MAX_RETRIES) {
+    setSyncStatus('error', `Could not reach Google Sheet (showing backup data). Retrying... (${retryCount}/${MAX_RETRIES})`);
+    setTimeout(loadData, 8000);
+  } else {
+    setSyncStatus('error', 'Could not reach Google Sheet after several attempts. Showing backup data — please refresh the page to try again.');
   }
   renderAll();
 }
