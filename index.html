@@ -56,6 +56,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .t-done{background:#1a4a25;color:#80cc90}.t-due{background:#4a1515;color:#f08080}
 .t-pending{background:#4a3a10;color:#e0b860}.t-sterilized{background:#1a3a5a;color:#80b0e0}
 .t-campus{background:#1a3a1a;color:#70b070}
+.t-campus-missing{background:#4a3a10;color:#e0b860}
+.t-campus-deceased{background:#4a1515;color:#f08080}
+.t-campus-offcampus{background:#4a1515;color:#f08080}
+.t-campus-inout{background:#4a3a10;color:#e0b860}
+.t-campus-food{background:#1a3a6e;color:#7ab3f0}
 .search-bar{width:100%;padding:11px 16px;font-size:14px;background:var(--surface);border:1px solid var(--border-s);border-radius:var(--radius);color:var(--text);margin-bottom:12px;outline:none}
 .search-bar:focus{border-color:var(--brand-lt)}
 .filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
@@ -367,6 +372,16 @@ function isOffCampus(d) {
   return s === 'Missing' || s === 'Deceased' || s === 'Off campus';
 }
 
+function campusClass(status) {
+  const s = (status||'').trim();
+  if (s === 'Deceased') return 't-campus-deceased';
+  if (s === 'Missing') return 't-campus-missing';
+  if (s === 'Off campus') return 't-campus-offcampus';
+  if (s === 'In and out') return 't-campus-inout';
+  if (s === 'Only comes for food') return 't-campus-food';
+  return 't-campus'; // Always on campus — green
+}
+
 function healthStats(list) {
   let vdone=0,vdue=0,sdone=0,spend=0;
   list.forEach(d=>{
@@ -511,7 +526,7 @@ function openProfile(id){
       ${d.temperament?`<span class="tag ${tClass(d.temperament)}">${d.temperament}</span>`:''}
       <span class="tag ${vClass(d.vacc)}">Vacc: ${d.vacc}</span>
       <span class="tag ${d.steril==='Done'?'t-sterilized':'t-pending'}">Steril: ${d.steril}</span>
-      ${d.campusStatus?`<span class="tag t-campus">${d.campusStatus}</span>`:''}
+      ${d.campusStatus?`<span class="tag ${campusClass(d.campusStatus)}">${d.campusStatus}</span>`:''}
     </div>
     <div class="info-grid">
       <div class="info-item"><div class="info-lbl">Territory</div><div class="info-val">${d.territory||'—'}</div></div>
