@@ -66,6 +66,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
 .f-btn{font-size:12px;padding:6px 14px;border:1px solid var(--border-s);border-radius:20px;background:none;color:var(--t2);cursor:pointer}
 .f-btn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.f-btn.f-male{border-color:#3a6ea8;color:#7ab3f0}
+.f-btn.f-male.active{background:#1a3a6e;color:#fff;border-color:#1a3a6e}
+.f-btn.f-female{border-color:#a84a7a;color:#f0a0d0}
+.f-btn.f-female.active{background:#8b1a5a;color:#fff;border-color:#8b1a5a}
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px}
 th{text-align:left;padding:10px 12px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);white-space:nowrap}
@@ -173,8 +177,8 @@ tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
         <button class="f-btn" onclick="setFilter('Friendly',this)">Friendly</button>
         <button class="f-btn" onclick="setFilter('Aggressive',this)">Aggressive</button>
         <button class="f-btn" onclick="setFilter('Shy',this)">Shy</button>
-        <button class="f-btn" onclick="setFilter('Male',this)">Male</button>
-        <button class="f-btn" onclick="setFilter('Female',this)">Female</button>
+        <button class="f-btn f-male" onclick="setFilter('Male',this)">Male</button>
+        <button class="f-btn f-female" onclick="setFilter('Female',this)">Female</button>
         <button class="f-btn" onclick="setFilter('due',this)">Vacc Due</button>
       </div>
       <div class="gallery" id="mainGallery"></div>
@@ -206,7 +210,7 @@ const PASSWORD = 'Nirlondogs2026';
 
 // After you publish your Google Sheet as CSV (see the setup guide),
 // paste the link here between the quotes:
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZDAobEEf1y6P40HrJC9PLz0n6mnmaA_06FlI4a3WAn5U4QazzC49nL2nnQIf8IeySsqd1sdLb9IWe/pub?gid=425074004&single=true&output=csv';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZDAobEEf1y6P40HrJC9PLz0n6mnmaA_06FlI4a3WAn5U4QazzC49nL2nnQIf8IeySsqd1sdLb9IWe/pub?gid=259802410&single=true&output=csv';
 // ════════════════════════════════════════════════════
 
 let DOGS = [], activeFilter = 'all', prevTab = 'gallery', currentTab = 'dashboard';
