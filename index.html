@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NKP Campus Dogs</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--brand:#8B0000;--brand-lt:#b30000;--bg:#111;--surface:#1a1a1a;--card:#222;--border:rgba(255,255,255,0.08);--border-s:rgba(255,255,255,0.15);--text:#f0f0f0;--t2:#aaa;--t3:#555;--radius:8px;--radius-lg:12px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -71,6 +72,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .f-btn.f-female{border-color:#a84a7a;color:#f0a0d0}
 .f-btn.f-female.active{background:#8b1a5a;color:#fff;border-color:#8b1a5a}
 .tbl-wrap{overflow-x:auto}
+.tbl-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.export-btn{display:inline-flex;align-items:center;gap:6px;background:var(--brand);color:#fff;border:none;border-radius:var(--radius);padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.export-btn:hover{background:var(--brand-lt)}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px}
 th{text-align:left;padding:10px 12px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);white-space:nowrap}
 td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
@@ -136,7 +140,8 @@ tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
   <div class="nav">
     <button class="nav-btn active" onclick="showTab('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
     <button class="nav-btn" onclick="showTab('gallery',this)"><i class="ti ti-grid-dots"></i> Gallery</button>
-    <button class="nav-btn" onclick="showTab('allDogs',this)"><i class="ti ti-list"></i> All Dogs</button>
+    <button class="nav-btn" onclick="showTab('onCampus',this)"><i class="ti ti-list"></i> On Campus</button>
+    <button class="nav-btn" onclick="showTab('offCampus',this)"><i class="ti ti-list"></i> Off Campus</button>
     <button class="nav-btn" onclick="showTab('vacc',this)"><i class="ti ti-vaccine"></i> Vaccination</button>
     <button class="nav-btn" id="profileNavBtn" style="display:none" onclick="showTab('profile',this)"><i class="ti ti-dog"></i> Profile</button>
   </div>
@@ -183,10 +188,24 @@ tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
       </div>
       <div class="gallery" id="mainGallery"></div>
     </div>
-    <div id="tab-allDogs" class="tab">
+    <div id="tab-onCampus" class="tab">
+      <div class="tbl-header">
+        <div class="section-title" style="margin-bottom:0">On Campus Dogs (<span id="onCampusCount">—</span>)</div>
+        <button class="export-btn" onclick="exportToExcel('on')"><i class="ti ti-file-spreadsheet"></i> Export as Excel</button>
+      </div>
       <div class="tbl-wrap"><table>
         <thead><tr><th>Dog ID</th><th>Name</th><th>Sex</th><th>Temperament</th><th>Territory</th><th>Pack</th><th>Vaccination</th><th>Sterilization</th></tr></thead>
-        <tbody id="dogTable"></tbody>
+        <tbody id="onCampusTable"></tbody>
+      </table></div>
+    </div>
+    <div id="tab-offCampus" class="tab">
+      <div class="tbl-header">
+        <div class="section-title" style="margin-bottom:0">Off Campus / Missing Dogs (<span id="offCampusCount">—</span>)</div>
+        <button class="export-btn" onclick="exportToExcel('off')"><i class="ti ti-file-spreadsheet"></i> Export as Excel</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Dog ID</th><th>Name</th><th>Sex</th><th>Temperament</th><th>Territory</th><th>Pack</th><th>Vaccination</th><th>Sterilization</th><th>Status</th></tr></thead>
+        <tbody id="offCampusTable"></tbody>
       </table></div>
     </div>
     <div id="tab-vacc" class="tab">
@@ -471,9 +490,8 @@ function setFilter(f,btn) {
   renderGallery();
 }
 
-function renderTable() {
-  document.getElementById('dogTable').innerHTML = DOGS.map(d=>`
-    <tr onclick="openProfile('${d.id}')">
+function rowHtml(d, includeStatus) {
+  return `<tr onclick="openProfile('${d.id}')">
       <td style="color:var(--t3);font-size:11px;font-weight:500">${d.id}</td>
       <td style="font-weight:500">${nameHtml(d)}</td>
       <td><span class="tag ${d.sex==='Female'?'t-female':'t-male'}">${d.sex}</span></td>
@@ -482,7 +500,40 @@ function renderTable() {
       <td style="color:var(--t2)">${d.pack}</td>
       <td><span class="tag ${vClass(d.vacc)}">${d.vacc}</span></td>
       <td><span class="tag ${d.steril==='Done'?'t-sterilized':'t-pending'}">${d.steril}</span></td>
-    </tr>`).join('');
+      ${includeStatus ? `<td><span class="tag ${campusClass(d.campusStatus)}">${d.campusStatus||'-'}</span></td>` : ''}
+    </tr>`;
+}
+
+function renderTable() {
+  const onCampusDogs  = DOGS.filter(d => !isOffCampus(d));
+  const offCampusDogs = DOGS.filter(d => isOffCampus(d));
+
+  document.getElementById('onCampusCount').textContent = onCampusDogs.length;
+  document.getElementById('offCampusCount').textContent = offCampusDogs.length;
+
+  document.getElementById('onCampusTable').innerHTML = onCampusDogs.map(d => rowHtml(d, false)).join('');
+  document.getElementById('offCampusTable').innerHTML = offCampusDogs.map(d => rowHtml(d, true)).join('');
+}
+
+function exportToExcel(which) {
+  const list = which === 'on' ? DOGS.filter(d => !isOffCampus(d)) : DOGS.filter(d => isOffCampus(d));
+  const headers = ['Dog ID','Name','Sex','Temperament','Territory','Pack','Vaccination','Next Due Date','Sterilization'];
+  if (which === 'off') headers.push('Campus Status');
+
+  const rows = list.map(d => {
+    const row = [d.id, d.name||'Unnamed', d.sex, d.temperament||'', d.territory||'', d.pack||'', d.vacc||'', d.nextDue||'', d.steril||''];
+    if (which === 'off') row.push(d.campusStatus||'');
+    return row;
+  });
+
+  const wsData = [headers, ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = headers.map(() => ({ wch: 20 }));
+  const wb = XLSX.utils.book_new();
+  const sheetName = which === 'on' ? 'On Campus Dogs' : 'Off Campus Dogs';
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  const filename = which === 'on' ? 'NKP_On_Campus_Dogs.xlsx' : 'NKP_Off_Campus_Dogs.xlsx';
+  XLSX.writeFile(wb, filename);
 }
 
 function renderVacc() {
@@ -557,7 +608,7 @@ function openProfile(id){
 }
 
 function goBack(){
-  const map={dashboard:0,gallery:1,allDogs:2,vacc:3};
+  const map={dashboard:0,gallery:1,onCampus:2,offCampus:3,vacc:4};
   const t=prevTab==='profile'?'gallery':prevTab;
   showTab(t,document.querySelectorAll('.nav-btn')[map[t]??1]);
 }
