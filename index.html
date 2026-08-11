@@ -40,7 +40,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .alert-box{background:rgba(139,0,0,.15);border:1px solid rgba(180,0,0,.35);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px}
 .alert-title{font-size:13px;font-weight:600;color:#ff9999;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .alert-item{font-size:13px;color:#ffaaaa;padding:3px 0;display:flex;align-items:center;gap:8px}
-.section-title{font-size:13px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title{font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin:28px 0 14px;padding-top:20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.section-title:first-child{margin-top:0;padding-top:0;border-top:none}
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
 .dog-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .1s}
 .dog-card:hover{border-color:var(--brand-lt);transform:translateY(-2px)}
@@ -147,7 +148,6 @@ tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
   </div>
   <div class="content">
     <div id="tab-dashboard" class="tab active">
-      <div class="sync-bar"><div class="sync-dot syncing" id="syncDot"></div><span id="syncMsg">Connecting to Google Sheet...</span></div>
       <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr))">
         <div class="stat"><div class="stat-num" style="color:#c084fc" id="s-total">—</div><div class="stat-lbl">Total Dogs</div></div>
         <div class="stat"><div class="stat-num" style="color:#60a5fa" id="s-male">—</div><div class="stat-lbl">Male</div></div>
@@ -155,7 +155,7 @@ tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
         <div class="stat"><div class="stat-num" style="color:#34d399" id="s-collar">—</div><div class="stat-lbl">Collared</div></div>
       </div>
 
-      <div class="section-title" style="margin-top:6px"><i class="ti ti-home"></i> On Campus — Health Compliance (<span id="s-on-count">—</span> dogs)</div>
+      <div class="section-title"><i class="ti ti-home"></i> On Campus — Health Compliance (<span id="s-on-count">—</span> dogs)</div>
       <div class="stats-grid">
         <div class="stat"><div class="stat-num" style="color:#4ade80" id="s-on-vdone">—</div><div class="stat-lbl">Vaccinated</div></div>
         <div class="stat"><div class="stat-num" style="color:#f87171" id="s-on-vdue">—</div><div class="stat-lbl">Vacc Due</div></div>
@@ -163,7 +163,7 @@ tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
         <div class="stat"><div class="stat-num" style="color:#f87171" id="s-on-spend">—</div><div class="stat-lbl">Steril. Pending</div></div>
       </div>
 
-      <div class="section-title" style="margin-top:6px"><i class="ti ti-door-exit"></i> Out of Campus / Missing (<span id="s-off-count">—</span> dogs)</div>
+      <div class="section-title"><i class="ti ti-door-exit"></i> Out of Campus / Missing (<span id="s-off-count">—</span> dogs)</div>
       <div class="stats-grid">
         <div class="stat"><div class="stat-num" style="color:#4ade80" id="s-off-vdone">—</div><div class="stat-lbl">Vaccinated</div></div>
         <div class="stat"><div class="stat-num" style="color:#f87171" id="s-off-vdue">—</div><div class="stat-lbl">Vacc Due</div></div>
@@ -171,8 +171,8 @@ tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
         <div class="stat"><div class="stat-num" style="color:#f87171" id="s-off-spend">—</div><div class="stat-lbl">Steril. Pending</div></div>
       </div>
 
+      <div class="section-title"><i class="ti ti-vaccine"></i> On Campus — Pending Vaccination</div>
       <div id="alertBox"></div>
-      <div class="section-title"><i class="ti ti-grid-dots"></i> Named dogs — quick view</div>
       <div class="gallery" id="dashGallery"></div>
     </div>
     <div id="tab-gallery" class="tab">
@@ -209,6 +209,10 @@ tr:hover td{background:rgba(255,255,255,.03);cursor:pointer}
       </table></div>
     </div>
     <div id="tab-vacc" class="tab">
+      <div class="tbl-header">
+        <div class="section-title" style="margin-bottom:0">Vaccination Schedule (<span id="vaccCount">—</span>)</div>
+        <button class="export-btn" onclick="exportToExcel('vacc')"><i class="ti ti-file-spreadsheet"></i> Export as Excel</button>
+      </div>
       <div class="tbl-wrap"><table>
         <thead><tr><th>Dog ID</th><th>Name</th><th>Sex</th><th>Territory</th><th>Vacc Status</th><th>Next Due Date</th><th>Sterilization</th></tr></thead>
         <tbody id="vaccTable"></tbody>
@@ -294,8 +298,10 @@ async function loadData() {
 }
 
 function setSyncStatus(state, msg) {
-  document.getElementById('syncDot').className = 'sync-dot' + (state==='syncing'?' syncing':state==='error'?' error':'');
-  document.getElementById('syncMsg').textContent = msg;
+  const dotEl = document.getElementById('syncDot');
+  const msgEl = document.getElementById('syncMsg');
+  if (dotEl) dotEl.className = 'sync-dot' + (state==='syncing'?' syncing':state==='error'?' error':'');
+  if (msgEl) msgEl.textContent = msg;
 }
 
 // ── CSV PARSER ───────────────────────────
@@ -444,27 +450,21 @@ function renderAll() {
   document.getElementById('s-off-sdone').textContent = off.sdone;
   document.getElementById('s-off-spend').textContent = off.spend;
 
-  // Alerts — on-campus overdue shown first (actionable now),
-  // out-of-campus overdue shown separately (lower priority, dog isn't reachable)
+  // Alerts — only on-campus overdue is shown, since those are the actionable ones
   const onDue  = onCampusDogs.filter(d=>d.vacc==='Due');
-  const offDue = offCampusDogs.filter(d=>d.vacc==='Due');
   let alertHtml = '';
   if (onDue.length) {
-    alertHtml += `<div class="alert-box">
-      <div class="alert-title"><i class="ti ti-alert-triangle"></i> ON CAMPUS — Vaccination overdue (${onDue.length} dog${onDue.length>1?'s':''} need action now)</div>
+    alertHtml = `<div class="alert-box">
+      <div class="alert-title"><i class="ti ti-alert-triangle"></i> ${onDue.length} dog${onDue.length>1?'s':''} need action now</div>
       ${onDue.map(d=>`<div class="alert-item"><i class="ti ti-circle-filled" style="font-size:7px"></i> <strong>${dn(d)}</strong> (${d.id}) · ${d.territory}</div>`).join('')}
-    </div>`;
-  }
-  if (offDue.length) {
-    alertHtml += `<div class="alert-box" style="opacity:0.65">
-      <div class="alert-title"><i class="ti ti-alert-triangle"></i> OUT OF CAMPUS — Vaccination overdue (${offDue.length} dog${offDue.length>1?'s':''}, lower priority)</div>
-      ${offDue.map(d=>`<div class="alert-item"><i class="ti ti-circle-filled" style="font-size:7px"></i> <strong>${dn(d)}</strong> (${d.id}) · ${d.territory}</div>`).join('')}
     </div>`;
   }
   document.getElementById('alertBox').innerHTML = alertHtml;
 
-  // Dashboard gallery — named dogs only
-  document.getElementById('dashGallery').innerHTML = DOGS.filter(d=>d.name).slice(0,8).map(dogCard).join('');
+  // Dashboard gallery — on-campus dogs pending vaccination, shown as clickable photo cards
+  document.getElementById('dashGallery').innerHTML = onDue.length
+    ? onDue.map(dogCard).join('')
+    : '<p style="color:var(--t3);padding:8px 0;font-size:13px">No on-campus dogs are currently due for vaccination.</p>';
 
   renderGallery();
   renderTable();
@@ -516,28 +516,38 @@ function renderTable() {
 }
 
 function exportToExcel(which) {
-  const list = which === 'on' ? DOGS.filter(d => !isOffCampus(d)) : DOGS.filter(d => isOffCampus(d));
-  const headers = ['Dog ID','Name','Sex','Temperament','Territory','Pack','Vaccination','Next Due Date','Sterilization'];
-  if (which === 'off') headers.push('Campus Status');
+  let list, headers, rows, sheetName, filename;
 
-  const rows = list.map(d => {
-    const row = [d.id, d.name||'Unnamed', d.sex, d.temperament||'', d.territory||'', d.pack||'', d.vacc||'', d.nextDue||'', d.steril||''];
-    if (which === 'off') row.push(d.campusStatus||'');
-    return row;
-  });
+  if (which === 'vacc') {
+    list = DOGS;
+    headers = ['Dog ID','Name','Sex','Territory','Vacc Status','Next Due Date','Sterilization'];
+    rows = list.map(d => [d.id, d.name||'Unnamed', d.sex, d.territory||'', d.vacc||'', d.nextDue||'', d.steril||'']);
+    sheetName = 'Vaccination Schedule';
+    filename = 'NKP_Vaccination_Schedule.xlsx';
+  } else {
+    list = which === 'on' ? DOGS.filter(d => !isOffCampus(d)) : DOGS.filter(d => isOffCampus(d));
+    headers = ['Dog ID','Name','Sex','Temperament','Territory','Pack','Vaccination','Next Due Date','Sterilization'];
+    if (which === 'off') headers.push('Campus Status');
+    rows = list.map(d => {
+      const row = [d.id, d.name||'Unnamed', d.sex, d.temperament||'', d.territory||'', d.pack||'', d.vacc||'', d.nextDue||'', d.steril||''];
+      if (which === 'off') row.push(d.campusStatus||'');
+      return row;
+    });
+    sheetName = which === 'on' ? 'On Campus Dogs' : 'Off Campus Dogs';
+    filename = which === 'on' ? 'NKP_On_Campus_Dogs.xlsx' : 'NKP_Off_Campus_Dogs.xlsx';
+  }
 
   const wsData = [headers, ...rows];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
   ws['!cols'] = headers.map(() => ({ wch: 20 }));
   const wb = XLSX.utils.book_new();
-  const sheetName = which === 'on' ? 'On Campus Dogs' : 'Off Campus Dogs';
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  const filename = which === 'on' ? 'NKP_On_Campus_Dogs.xlsx' : 'NKP_Off_Campus_Dogs.xlsx';
   XLSX.writeFile(wb, filename);
 }
 
 function renderVacc() {
   const today = new Date();
+  document.getElementById('vaccCount').textContent = DOGS.length;
   document.getElementById('vaccTable').innerHTML = DOGS.map(d=>{
     let dh='';
     if(d.vacc==='Due'){dh='<span class="days-red"> Overdue</span>';}
